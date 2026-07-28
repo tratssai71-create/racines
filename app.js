@@ -341,7 +341,7 @@
       </div>
       <div class="field" id="f-concern">
         <label>お悩み <span style="color:var(--danger)">*</span></label>
-        <input type="text" id="concern" value="${c.concern}" placeholder="例: 毛穴の開き、乾燥が気になる">
+        <input type="text" id="concern" value="${c.concern}" placeholder="例: 肩こり、頭痛、疲れが取れない">
         <div class="field-error">お悩みを入力してください</div>
       </div>
       <div class="field">

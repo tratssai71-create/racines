@@ -15,7 +15,7 @@
     menu: null,
     date: null, // "YYYY-MM-DD"
     time: null, // "HH:MM"
-    customer: { name: "", tel: "", email: "", note: "" },
+    customer: { name: "", tel: "", email: "", age: "", concern: "", note: "" },
     gridStartOffset: 0, // 表示中の週の開始日（今日からの日数）
     slotsCache: {},
   };
@@ -201,6 +201,7 @@
       <h2>メニューを選択してください</h2>
       ${CFG.menuCategories.map((cat) => `
         <div class="menu-category">
+          ${cat.image ? `<div class="menu-category__photo"><img src="${cat.image}" alt="${cat.label}"></div>` : ""}
           <div class="menu-category__head">
             <span class="menu-category__en">${cat.name}</span>
             <span class="menu-category__ja">${cat.label}</span>
@@ -333,6 +334,16 @@
         <input type="email" id="email" value="${c.email}" placeholder="example@mail.com">
         <div class="field-error">正しいメールアドレスを入力してください</div>
       </div>
+      <div class="field" id="f-age">
+        <label>年齢 <span style="color:var(--danger)">*</span></label>
+        <input type="number" id="age" value="${c.age}" placeholder="32" min="1" max="110">
+        <div class="field-error">年齢を入力してください</div>
+      </div>
+      <div class="field" id="f-concern">
+        <label>お悩み <span style="color:var(--danger)">*</span></label>
+        <input type="text" id="concern" value="${c.concern}" placeholder="例: 毛穴の開き、乾燥が気になる">
+        <div class="field-error">お悩みを入力してください</div>
+      </div>
       <div class="field">
         <label>ご要望・備考（任意）</label>
         <textarea id="note" placeholder="ご要望があればご記入ください">${c.note}</textarea>
@@ -347,18 +358,23 @@
       const name = document.getElementById("name").value.trim();
       const tel = document.getElementById("tel").value.trim();
       const email = document.getElementById("email").value.trim();
+      const age = document.getElementById("age").value.trim();
+      const concern = document.getElementById("concern").value.trim();
       const note = document.getElementById("note").value.trim();
 
       const telOk = /^[0-9\-+()]{9,15}$/.test(tel);
       const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      const ageOk = /^[0-9]{1,3}$/.test(age) && Number(age) >= 1 && Number(age) <= 110;
 
       document.getElementById("f-name").classList.toggle("invalid", !name);
       document.getElementById("f-tel").classList.toggle("invalid", !telOk);
       document.getElementById("f-email").classList.toggle("invalid", !emailOk);
+      document.getElementById("f-age").classList.toggle("invalid", !ageOk);
+      document.getElementById("f-concern").classList.toggle("invalid", !concern);
 
-      if (!name || !telOk || !emailOk) return;
+      if (!name || !telOk || !emailOk || !ageOk || !concern) return;
 
-      state.customer = { name, tel, email, note };
+      state.customer = { name, tel, email, age, concern, note };
       state.step = 4;
       render();
     });
@@ -374,6 +390,8 @@
         <li><span>お名前</span><span>${c.name}</span></li>
         <li><span>電話番号</span><span>${c.tel}</span></li>
         <li><span>メール</span><span>${c.email}</span></li>
+        <li><span>年齢</span><span>${c.age}歳</span></li>
+        <li><span>お悩み</span><span>${c.concern}</span></li>
         ${c.note ? `<li><span>備考</span><span>${c.note}</span></li>` : ""}
       </ul>
       <div class="notice">この内容で予約を確定すると、店舗のGoogleカレンダーに自動で登録され、ご入力いただいたメールアドレス宛に確認メールが送信されます。</div>
@@ -397,6 +415,8 @@
         name: c.name,
         tel: c.tel,
         email: c.email,
+        age: c.age,
+        concern: c.concern,
         note: c.note,
       };
       try {
@@ -438,7 +458,7 @@
       state.menu = null;
       state.date = null;
       state.time = null;
-      state.customer = { name: "", tel: "", email: "", note: "" };
+      state.customer = { name: "", tel: "", email: "", age: "", concern: "", note: "" };
       state.slotsCache = {};
       state.gridStartOffset = 0;
       render();

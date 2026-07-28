@@ -35,6 +35,7 @@ const SALON_CONFIG = {
       id: "herb",
       name: "HERB TREATMENT",
       label: "ハーブトリートメント",
+      image: "images/menu_herb.jpg",
       items: [
         { id: "herb_first", name: "ハーブトリートメント（初回）", durationMin: 90, price: 15400, desc: "メディセル筋膜リリース＆ドライヘッドスパ付き" },
         { id: "herb_regular", name: "ハーブトリートメント（通常）", durationMin: 80, price: 21800, desc: "オプション：ヒト幹細胞培養液セラム+2,500円／エクソソーム導入+3,000円（当日ご相談ください）" },
@@ -44,6 +45,7 @@ const SALON_CONFIG = {
       id: "spa",
       name: "DRY HEAD SPA",
       label: "ドライヘッドスパ",
+      image: "images/menu_spa.jpg",
       items: [
         { id: "spa_first", name: "ドライヘッドスパ60分（初回）", durationMin: 60, price: 6500, desc: "" },
         { id: "spa_utotori", name: "うっとりうたた寝", durationMin: 60, price: 7900, desc: "60分" },
@@ -55,6 +57,7 @@ const SALON_CONFIG = {
       id: "medicel",
       name: "MEDICEL",
       label: "メディセル筋膜リリース",
+      image: "images/menu_medicel.jpg",
       items: [
         { id: "medicel_full", name: "全身", durationMin: 90, price: 15000, desc: "" },
         { id: "medicel_back", name: "背面", durationMin: 60, price: 11000, desc: "" },

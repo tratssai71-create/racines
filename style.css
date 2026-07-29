@@ -384,7 +384,8 @@ body {
 .field label { display: block; font-size: 0.8rem; color: var(--ink2); margin-bottom: 6px; }
 
 .field input,
-.field textarea {
+.field textarea,
+.field select {
   width: 100%;
   padding: 11px 12px;
   border: 1px solid var(--line);
@@ -396,7 +397,8 @@ body {
 }
 
 .field input:focus,
-.field textarea:focus { outline: none; border-color: var(--ac); }
+.field textarea:focus,
+.field select:focus { outline: none; border-color: var(--ac); }
 
 .field textarea { resize: vertical; min-height: 70px; }
 
@@ -512,6 +514,13 @@ body {
   letter-spacing: 0.05em;
   color: var(--ink3);
 }
+
+.footer-link {
+  color: var(--ac-d);
+  text-decoration: none;
+  letter-spacing: 0.08em;
+}
+.footer-link:hover { text-decoration: underline; }
 
 /* ---------- レスポンシブ（スマホ） ---------- */
 @media (max-width: 480px) {

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ご予約の確認・キャンセル</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="mypage.css">
+</head>
+<body>
+<header class="hero">
+  <div class="hero__inner">
+    <p class="hero__eyebrow">MY RESERVATIONS</p>
+    <h1 class="hero__name" id="salonName">SALON NAME</h1>
+    <div class="hero__divider"><span></span></div>
+    <p class="hero__meta" id="salonMeta"></p>
+  </div>
+</header>
+
+<div class="app">
+  <div id="demoBanner" class="demo-banner" style="display:none;">
+    デモモードで動作中です（この画面ではブラウザ内の仮予約のみ表示されます）。
+  </div>
+
+  <main class="card">
+    <h2>ご予約の確認・キャンセル</h2>
+    <p style="color:var(--ink2);font-size:0.85rem;margin-top:-14px;">ご予約時にご入力いただいたメールアドレスを入力してください。</p>
+    <div class="field" id="f-lookupEmail">
+      <label>メールアドレス</label>
+      <input type="email" id="lookupEmail" placeholder="example@mail.com">
+      <div class="field-error">正しいメールアドレスを入力してください</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="lookupBtn">予約を確認する</button>
+    </div>
+
+    <div id="resultArea"></div>
+  </main>
+
+  <footer class="app-footer">
+    <p><a href="index.html" class="footer-link">新しくご予約はこちら</a></p>
+    <p id="salonFooterMeta"></p>
+  </footer>
+</div>
+
+<script src="config.js"></script>
+<script src="mypage.js"></script>
+</body>
+</html>

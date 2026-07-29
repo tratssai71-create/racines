@@ -11,12 +11,38 @@
   const MAX_ADVANCE_DAYS = 30; // 今日から何日先まで予約を受け付けるか
   const isDemo = !CFG.API_URL;
 
+  // ---------- お客様情報の記憶（ログイン不要・ブラウザに保存） ----------
+  const PROFILE_KEY = "salon_customer_profile";
+  function loadSavedProfile() {
+    try {
+      const raw = localStorage.getItem(PROFILE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+  function saveProfile(customer) {
+    try {
+      localStorage.setItem(PROFILE_KEY, JSON.stringify({
+        name: customer.name, tel: customer.tel, email: customer.email, age: customer.age,
+      }));
+    } catch (e) { /* localStorageが使えない環境は無視 */ }
+  }
+  const savedProfile = loadSavedProfile();
+
   const state = {
     step: 1,
     menu: null,
     date: null, // "YYYY-MM-DD"
     time: null, // "HH:MM"
-    customer: { name: "", tel: "", email: "", age: "", concern: "", note: "" },
+    customer: {
+      name: savedProfile?.name || "",
+      tel: savedProfile?.tel || "",
+      email: savedProfile?.email || "",
+      age: savedProfile?.age || "",
+      concern: "",
+      note: "",
+    },
     gridStartOffset: 0, // 表示中の週の開始日（今日からの日数）
     slotsCache: {},
   };
@@ -338,8 +364,11 @@
       </div>
       <div class="field" id="f-age">
         <label>年齢 <span style="color:var(--danger)">*</span></label>
-        <input type="number" id="age" value="${c.age}" placeholder="32" min="1" max="110">
-        <div class="field-error">年齢を入力してください</div>
+        <select id="age">
+          <option value="">選択してください</option>
+          ${Array.from({ length: 99 }, (_, i) => i + 1).map((n) => `<option value="${n}" ${String(c.age) === String(n) ? "selected" : ""}>${n}歳</option>`).join("")}
+        </select>
+        <div class="field-error">年齢を選択してください</div>
       </div>
       <div class="field" id="f-concern">
         <label>お悩み <span style="color:var(--danger)">*</span></label>
@@ -424,6 +453,7 @@
       try {
         const result = await submitReservation(payload);
         if (result.success) {
+          saveProfile(c);
           state.reservationId = result.reservationId;
           state.step = 5;
           render();
@@ -460,7 +490,8 @@
       state.menu = null;
       state.date = null;
       state.time = null;
-      state.customer = { name: "", tel: "", email: "", age: "", concern: "", note: "" };
+      const p = loadSavedProfile();
+      state.customer = { name: p?.name || "", tel: p?.tel || "", email: p?.email || "", age: p?.age || "", concern: "", note: "" };
       state.slotsCache = {};
       state.gridStartOffset = 0;
       render();

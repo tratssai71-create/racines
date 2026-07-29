@@ -210,6 +210,7 @@
           <div class="option-list">
             ${cat.items.map((m) => `
               <div class="option-item ${state.menu?.id === m.id ? "selected" : ""}" data-id="${m.id}">
+                ${m.image ? `<div class="option-item__thumb"><img src="${m.image}" alt=""></div>` : ""}
                 <div class="option-item__main">
                   <span class="option-item__name">${m.name}</span>
                   <span class="option-item__meta">所要時間 約${m.durationMin}分${m.desc ? " ・ " + m.desc : ""}</span>

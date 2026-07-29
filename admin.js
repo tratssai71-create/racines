@@ -451,6 +451,12 @@
                   <input type="text" class="item-desc" value="${item.desc || ""}" placeholder="例: 根元から毛先まで">
                 </div>
               </div>
+              <div class="admin-item-row__photo">
+                <div class="admin-item-field">
+                  <label>写真URL（任意）</label>
+                  <input type="text" class="item-image" value="${item.image || ""}" placeholder="https://...">
+                </div>
+              </div>
             </div>
           `).join("")}
         </div>
@@ -470,7 +476,7 @@
         renderMenuCats();
       });
       $cat.querySelector(".add-item").addEventListener("click", () => {
-        config.menuCategories[ci].items.push({ id: newId("item"), name: "", durationMin: 60, price: 0, desc: "" });
+        config.menuCategories[ci].items.push({ id: newId("item"), name: "", durationMin: 60, price: 0, desc: "", image: "" });
         collapsedCats.delete(ci);
         renderMenuCats();
       });
@@ -496,6 +502,7 @@
         item.durationMin = Number($row.querySelector(".item-duration").value) || 30;
         item.price = Number($row.querySelector(".item-price").value) || 0;
         item.desc = $row.querySelector(".item-desc").value.trim();
+        item.image = $row.querySelector(".item-image").value.trim();
       });
     });
     saveConfig("menuMsg");

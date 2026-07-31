@@ -27,31 +27,50 @@ body {
 /* ---------- ヒーロー ---------- */
 .hero {
   position: relative;
-  background:
-    radial-gradient(circle at 50% -10%, rgba(166, 138, 74, 0.35), transparent 60%),
-    linear-gradient(160deg, #2b2b2b 0%, #1c1c1c 65%, #0d0d0d 100%);
-  color: #f0efec;
-  padding: 64px 20px 56px;
+  background: linear-gradient(180deg, #A88E72 0%, #A88E72 30%, #BEAE9A 62%, #C9B9A6 88%, #f5f4f2 100%);
+  color: #fffaf3;
+  padding: 64px 20px 100px;
   text-align: center;
   overflow: hidden;
 }
 
-.hero::before {
+.hero::before,
+.hero::after {
   content: "";
   position: absolute;
-  inset: 0;
-  background-image:
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
   pointer-events: none;
 }
 
-.hero__inner { position: relative; max-width: 560px; margin: 0 auto; }
+.hero::before {
+  width: 620px;
+  height: 620px;
+  top: -260px;
+  left: 50%;
+  transform: translateX(-62%);
+}
+
+.hero::after {
+  width: 340px;
+  height: 340px;
+  top: -60px;
+  right: -80px;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.hero__inner {
+  position: relative;
+  max-width: 560px;
+  margin: 0 auto;
+  text-shadow: 0 1px 4px rgba(43, 35, 26, 0.35);
+}
 
 .hero__eyebrow {
   font-family: "Inter", sans-serif;
   font-size: 0.7rem;
   letter-spacing: 0.42em;
-  color: rgba(240, 239, 236, 0.55);
+  color: rgba(255, 250, 243, 0.7);
   margin: 0 0 18px;
   text-transform: uppercase;
 }
@@ -68,7 +87,7 @@ body {
   font-family: "Shippori Mincho", serif;
   font-size: 0.95rem;
   letter-spacing: 0.14em;
-  color: rgba(240, 239, 236, 0.78);
+  color: rgba(255, 250, 243, 0.88);
   margin: 0;
 }
 
@@ -82,7 +101,7 @@ body {
 .hero__divider span {
   width: 5px;
   height: 5px;
-  background: var(--ac);
+  background: #fffaf3;
   transform: rotate(45deg);
 }
 
@@ -91,7 +110,7 @@ body {
   content: "";
   height: 1px;
   width: 64px;
-  background: rgba(240, 239, 236, 0.25);
+  background: rgba(255, 250, 243, 0.4);
   margin: 0 14px;
 }
 
@@ -99,7 +118,7 @@ body {
   font-family: "Inter", sans-serif;
   font-size: 0.72rem;
   letter-spacing: 0.04em;
-  color: rgba(240, 239, 236, 0.5);
+  color: rgba(255, 250, 243, 0.65);
   margin: 0;
 }
 

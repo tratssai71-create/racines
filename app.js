@@ -24,7 +24,7 @@
   function saveProfile(customer) {
     try {
       localStorage.setItem(PROFILE_KEY, JSON.stringify({
-        name: customer.name, tel: customer.tel, email: customer.email, age: customer.age,
+        name: customer.name, kana: customer.kana, tel: customer.tel, email: customer.email, age: customer.age,
       }));
     } catch (e) { /* localStorageが使えない環境は無視 */ }
   }
@@ -37,6 +37,7 @@
     time: null, // "HH:MM"
     customer: {
       name: savedProfile?.name || "",
+      kana: savedProfile?.kana || "",
       tel: savedProfile?.tel || "",
       email: savedProfile?.email || "",
       age: savedProfile?.age || "",
@@ -352,6 +353,11 @@
         <input type="text" id="name" value="${c.name}" placeholder="山田 太郎">
         <div class="field-error">お名前を入力してください</div>
       </div>
+      <div class="field" id="f-kana">
+        <label>フリガナ <span style="color:var(--danger)">*</span></label>
+        <input type="text" id="kana" value="${c.kana}" placeholder="ヤマダ タロウ">
+        <div class="field-error">フリガナをカタカナで入力してください</div>
+      </div>
       <div class="field" id="f-tel">
         <label>電話番号 <span style="color:var(--danger)">*</span></label>
         <input type="tel" id="tel" value="${c.tel}" placeholder="09012345678">
@@ -387,25 +393,28 @@
     document.getElementById("back").addEventListener("click", () => { state.step = 2; render(); });
     document.getElementById("next").addEventListener("click", () => {
       const name = document.getElementById("name").value.trim();
+      const kana = document.getElementById("kana").value.trim();
       const tel = document.getElementById("tel").value.trim();
       const email = document.getElementById("email").value.trim();
       const age = document.getElementById("age").value.trim();
       const concern = document.getElementById("concern").value.trim();
       const note = document.getElementById("note").value.trim();
 
+      const kanaOk = /^[ァ-ヶー\s　]+$/.test(kana);
       const telOk = /^[0-9\-+()]{9,15}$/.test(tel);
       const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
       const ageOk = /^[0-9]{1,3}$/.test(age) && Number(age) >= 1 && Number(age) <= 110;
 
       document.getElementById("f-name").classList.toggle("invalid", !name);
+      document.getElementById("f-kana").classList.toggle("invalid", !kanaOk);
       document.getElementById("f-tel").classList.toggle("invalid", !telOk);
       document.getElementById("f-email").classList.toggle("invalid", !emailOk);
       document.getElementById("f-age").classList.toggle("invalid", !ageOk);
       document.getElementById("f-concern").classList.toggle("invalid", !concern);
 
-      if (!name || !telOk || !emailOk || !ageOk || !concern) return;
+      if (!name || !kanaOk || !telOk || !emailOk || !ageOk || !concern) return;
 
-      state.customer = { name, tel, email, age, concern, note };
+      state.customer = { name, kana, tel, email, age, concern, note };
       state.step = 4;
       render();
     });
@@ -419,13 +428,14 @@
         <li><span>メニュー</span><span>${state.menu.categoryLabel} - ${state.menu.name}（${fmtPrice(state.menu.price)}）</span></li>
         <li><span>日時</span><span>${fmtDateLabel(state.date)} ${state.time}〜</span></li>
         <li><span>お名前</span><span>${c.name}</span></li>
+        <li><span>フリガナ</span><span>${c.kana}</span></li>
         <li><span>電話番号</span><span>${c.tel}</span></li>
         <li><span>メール</span><span>${c.email}</span></li>
         <li><span>年齢</span><span>${c.age}歳</span></li>
         <li><span>お悩み</span><span>${c.concern}</span></li>
         ${c.note ? `<li><span>備考</span><span>${c.note}</span></li>` : ""}
       </ul>
-      <div class="notice">この内容で予約を確定すると、店舗のGoogleカレンダーに自動で登録され、ご入力いただいたメールアドレス宛に確認メールが送信されます。</div>
+      <div class="notice">この内容で予約を確定すると、ご入力いただいたメールアドレス宛に確認メールが送信されます。</div>
       <div class="btn-row">
         <button class="btn btn-ghost" id="back">戻る</button>
         <button class="btn btn-primary" id="confirm">予約を確定する</button>
@@ -444,6 +454,7 @@
         date: state.date,
         time: state.time,
         name: c.name,
+        kana: c.kana,
         tel: c.tel,
         email: c.email,
         age: c.age,
@@ -475,7 +486,7 @@
     $container.innerHTML = `
       <div class="done-icon">✓</div>
       <p class="done-title">ご予約を承りました</p>
-      <p class="done-sub">${isDemo ? "（デモモードのため実際のカレンダーには追加されていません）" : "Googleカレンダーに自動登録されました。確認メールをご確認ください。"}</p>
+      <p class="done-sub">${isDemo ? "（デモモードのため実際の予約は反映されていません）" : "確認メールをお送りしましたので、ご確認ください。"}</p>
       <div class="reservation-id">${state.reservationId}</div>
       <ul class="confirm-list">
         <li><span>メニュー</span><span>${state.menu.name}</span></li>
@@ -491,7 +502,7 @@
       state.date = null;
       state.time = null;
       const p = loadSavedProfile();
-      state.customer = { name: p?.name || "", tel: p?.tel || "", email: p?.email || "", age: p?.age || "", concern: "", note: "" };
+      state.customer = { name: p?.name || "", kana: p?.kana || "", tel: p?.tel || "", email: p?.email || "", age: p?.age || "", concern: "", note: "" };
       state.slotsCache = {};
       state.gridStartOffset = 0;
       render();

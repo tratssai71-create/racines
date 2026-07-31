@@ -523,6 +523,11 @@
         <div class="field"><label>電話番号</label><input type="text" id="s_tel" value="${config.tel}"></div>
         <div class="field"><label>住所</label><input type="text" id="s_address" value="${config.address}"></div>
       </div>
+      <div class="field">
+        <label>駐車場案内（任意）</label>
+        <textarea id="s_parking" placeholder="例: 店舗前に2台分あり／近隣コインパーキングをご利用ください">${config.parkingInfo || ""}</textarea>
+        <p style="color:var(--ink2);font-size:0.76rem;margin-top:6px;">入力すると、お客様への確認メールに自動で記載されます。</p>
+      </div>
 
       <hr style="border:none;border-top:1px solid var(--line);margin:26px 0;">
       <h2 style="font-size:1rem;">お客様への確認メールの文面</h2>
@@ -550,6 +555,7 @@
       config.tagline = document.getElementById("s_tagline").value.trim();
       config.tel = document.getElementById("s_tel").value.trim();
       config.address = document.getElementById("s_address").value.trim();
+      config.parkingInfo = document.getElementById("s_parking").value.trim();
       saveConfig("settingsMsg").then(() => { $adminSalonName.textContent = `${config.salonName} 管理画面`; });
     });
     document.getElementById("emailSave").addEventListener("click", () => {

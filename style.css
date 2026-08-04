@@ -281,7 +281,7 @@ body {
 
 .option-item__main { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
 .option-item__name { font-weight: 500; }
-.option-item__meta { font-size: 0.76rem; color: var(--ink2); }
+.option-item__meta { font-size: 0.76rem; color: var(--ink2); white-space: pre-line; }
 .option-item__price {
   font-family: "Cormorant Garamond", serif;
   font-weight: 600;

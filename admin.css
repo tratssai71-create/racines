@@ -189,6 +189,30 @@
 
 .admin-item-row__photo { margin-top: 10px; }
 
+.admin-item-photo-upload {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-item-photo-preview {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+}
+
+.admin-upload-btn { flex: none; cursor: pointer; }
+
+.admin-upload-status {
+  font-size: 0.76rem;
+  color: var(--ink2);
+}
+
 .admin-item-field label {
   display: block;
   font-size: 0.68rem;

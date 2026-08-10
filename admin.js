@@ -456,6 +456,14 @@
                   <label>写真URL（任意）</label>
                   <input type="text" class="item-image" value="${item.image || ""}" placeholder="https://...">
                 </div>
+                <div class="admin-item-photo-upload">
+                  ${item.image ? `<img class="admin-item-photo-preview" src="${item.image}" alt="">` : ""}
+                  <label class="btn btn-ghost btn-small admin-upload-btn">
+                    写真を選ぶ
+                    <input type="file" class="item-image-file" accept="image/*" style="display:none;">
+                  </label>
+                  <span class="admin-upload-status"></span>
+                </div>
               </div>
             </div>
           `).join("")}
@@ -487,6 +495,65 @@
           renderMenuCats();
         });
       });
+      $cat.querySelectorAll(".item-image-file").forEach((fileInput) => {
+        fileInput.addEventListener("change", async () => {
+          const file = fileInput.files[0];
+          if (!file) return;
+          const $row = fileInput.closest(".admin-item-row");
+          const $status = $row.querySelector(".admin-upload-status");
+          const $urlInput = $row.querySelector(".item-image");
+          $status.textContent = "アップロード中…";
+          try {
+            const resized = await resizeImageForUpload_(file);
+            const res = await apiPost("uploadImage", {
+              fileName: file.name,
+              mimeType: resized.mimeType,
+              dataBase64: resized.base64,
+            });
+            if (res.success) {
+              $urlInput.value = res.url;
+              $status.textContent = "完了しました（保存を忘れずに）";
+              let $preview = $row.querySelector(".admin-item-photo-preview");
+              if (!$preview) {
+                $preview = document.createElement("img");
+                $preview.className = "admin-item-photo-preview";
+                $row.querySelector(".admin-item-photo-upload").prepend($preview);
+              }
+              $preview.src = res.url;
+            } else {
+              $status.textContent = "アップロードに失敗しました";
+            }
+          } catch (e) {
+            $status.textContent = "アップロードに失敗しました";
+          }
+          fileInput.value = "";
+        });
+      });
+    });
+  }
+
+  // 写真を長辺900pxほどに縮小してからアップロードする（通信量・表示速度のため）
+  function resizeImageForUpload_(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = () => {
+        img.onload = () => {
+          const maxSide = 900;
+          const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+          resolve({ base64: dataUrl.split(",")[1], mimeType: "image/jpeg" });
+        };
+        img.onerror = reject;
+        img.src = reader.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
     });
   }
 

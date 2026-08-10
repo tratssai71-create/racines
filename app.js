@@ -441,7 +441,7 @@
         <li><span>お悩み</span><span>${c.concern}</span></li>
         ${c.note ? `<li><span>備考</span><span>${c.note}</span></li>` : ""}
       </ul>
-      <div class="notice">この内容で予約を確定すると、ご入力いただいたメールアドレス宛に確認メールが送信されます。</div>
+      <div class="notice">この内容で送信すると、まずサロンにて予約リクエストとして受け付けます。サロン側の承認後に、ご入力いただいたメールアドレス宛に「予約確定」の確認メールが送信されます。</div>
       <div class="btn-row">
         <button class="btn btn-ghost" id="back">戻る</button>
         <button class="btn btn-primary" id="confirm">予約を確定する</button>
@@ -491,8 +491,8 @@
   function renderDoneStep() {
     $container.innerHTML = `
       <div class="done-icon">✓</div>
-      <p class="done-title">ご予約を承りました</p>
-      <p class="done-sub">${isDemo ? "（デモモードのため実際の予約は反映されていません）" : "確認メールをお送りしましたので、ご確認ください。"}</p>
+      <p class="done-title">ご予約リクエストを受け付けました</p>
+      <p class="done-sub">${isDemo ? "（デモモードのため実際の予約は反映されていません）" : "サロンにて内容を確認のうえ承認いたします。承認後、確定のご案内メールをお送りします。"}</p>
       <div class="reservation-id">${state.reservationId}</div>
       <ul class="confirm-list">
         <li><span>メニュー</span><span>${state.menu.name}</span></li>

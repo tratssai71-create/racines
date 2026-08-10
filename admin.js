@@ -148,20 +148,40 @@
       $adminContainer.querySelector(".loading").outerHTML = `<p class="empty-msg">今後60日以内の予約・ブロックはありません</p>`;
       return;
     }
-    const rows = list.map((r) => `
+    const rows = list.map((r) => {
+      const isPending = r.type === "reservation" && r.status === "pending";
+      const typeBadge = r.type === "blocked"
+        ? `<span class="badge badge--blocked">ブロック</span>`
+        : isPending
+          ? `<span class="badge badge--blocked">承認待ち</span>`
+          : `<span class="badge badge--reservation">予約確定</span>`;
+      return `
       <tr>
         <td>${fmtDateTime(r.start)}<br>〜 ${fmtDateTime(r.end)}</td>
-        <td><span class="badge ${r.type === "blocked" ? "badge--blocked" : "badge--reservation"}">${r.type === "blocked" ? "ブロック" : "予約"}</span></td>
+        <td>${typeBadge}</td>
         <td>${r.title}<br><span style="color:var(--ink2);white-space:pre-line;font-size:0.78rem;">${(r.description || "").replace(/</g, "&lt;")}</span></td>
-        <td><button class="btn btn-small btn-danger" data-id="${r.eventId}">削除</button></td>
+        <td>
+          ${isPending ? `<button class="btn btn-small btn-primary" data-approve-id="${r.eventId}">承認</button>` : ""}
+          <button class="btn btn-small btn-danger" data-id="${r.eventId}">削除</button>
+        </td>
       </tr>
-    `).join("");
+    `;
+    }).join("");
     $adminContainer.querySelector(".loading").outerHTML = `
       <table class="admin-table">
         <thead><tr><th>日時</th><th>種別</th><th>内容</th><th></th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     `;
+    $adminContainer.querySelectorAll("[data-approve-id]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        btn.disabled = true;
+        btn.textContent = "承認中…";
+        const r = await apiPost("adminApproveReservation", { eventId: btn.dataset.approveId });
+        if (r.success) renderReservations();
+        else { showMsg("resMsg", "承認に失敗しました", false); btn.disabled = false; btn.textContent = "承認"; }
+      });
+    });
     $adminContainer.querySelectorAll("[data-id]").forEach((btn) => {
       btn.addEventListener("click", async () => {
         if (!confirm("この予定を削除しますか？")) return;

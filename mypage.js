@@ -96,7 +96,7 @@
           <li class="history-item">
             <div class="history-item__main">
               <span class="history-item__date">${fmtDateTime(new Date(r.start))}〜</span>
-              <span class="history-item__title">${r.title}</span>
+              <span class="history-item__title">${r.title}${r.status === "pending" ? '　<span style="color:var(--ac-d);">（承認待ち）</span>' : ""}</span>
             </div>
             ${mode === "upcoming" ? `<button class="btn btn-small btn-danger" data-id="${r.eventId}">キャンセル</button>` : ""}
           </li>

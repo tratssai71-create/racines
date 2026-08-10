@@ -8,8 +8,14 @@
   const STEP_LABELS = ["メニュー", "日時", "情報", "確認"];
   const DOW_JA = ["日", "月", "火", "水", "木", "金", "土"];
   const DAYS_PER_PAGE = 7;
-  const MAX_ADVANCE_DAYS = 30; // 今日から何日先まで予約を受け付けるか
   const isDemo = !CFG.API_URL;
+
+  // 予約受付は「今月分のみ」。月が変わると翌月分が自動的に開放される。
+  function maxAdvanceDays() {
+    const now = new Date();
+    const lastDateOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    return lastDateOfMonth - now.getDate() + 1;
+  }
 
   // ---------- お客様情報の記憶（ログイン不要・ブラウザに保存） ----------
   const PROFILE_KEY = "salon_customer_profile";
@@ -311,7 +317,7 @@
       <div class="avail-nav">
         <button id="prevWeek" ${state.gridStartOffset <= 0 ? "disabled" : ""}>‹ 前の7日</button>
         <span class="avail-nav__label">${fmtDateLabel(pageDates[0]).replace(/（.+）/, "")} 〜 ${fmtDateLabel(pageDates[pageDates.length - 1]).replace(/（.+）/, "")}</span>
-        <button id="nextWeek" ${state.gridStartOffset + DAYS_PER_PAGE >= MAX_ADVANCE_DAYS ? "disabled" : ""}>次の7日 ›</button>
+        <button id="nextWeek" ${state.gridStartOffset + DAYS_PER_PAGE >= maxAdvanceDays() ? "disabled" : ""}>次の7日 ›</button>
       </div>
       <div class="avail-scroll">
         <table class="avail-table">
@@ -330,7 +336,7 @@
       render();
     });
     document.getElementById("nextWeek").addEventListener("click", () => {
-      state.gridStartOffset = Math.min(MAX_ADVANCE_DAYS - DAYS_PER_PAGE, state.gridStartOffset + DAYS_PER_PAGE);
+      state.gridStartOffset = Math.min(maxAdvanceDays() - DAYS_PER_PAGE, state.gridStartOffset + DAYS_PER_PAGE);
       render();
     });
     $container.querySelectorAll(".avail-td--open").forEach((el) => {

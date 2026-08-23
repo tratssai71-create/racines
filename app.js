@@ -10,9 +10,17 @@
   const DAYS_PER_PAGE = 7;
   const isDemo = !CFG.API_URL;
 
-  // 予約受付は「今月分のみ」。月が変わると翌月分が自動的に開放される。
+  // 予約受付は基本「今月分のみ」（月が変わると翌月分が自動的に開放される）。
+  // ただし管理画面で「予約受付をいつまで解放するか」が設定されている場合はそちらを優先し、
+  // サロン側の好きなタイミングで先の月まで前倒しで開放できるようにする。
   function maxAdvanceDays() {
     const now = new Date();
+    if (CFG.bookingOpenUntil) {
+      const [y, m, d] = CFG.bookingOpenUntil.split("-").map(Number);
+      const until = new Date(y, m - 1, d);
+      const diffDays = Math.round((until - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / (24 * 60 * 60 * 1000)) + 1;
+      if (diffDays > 0) return diffDays;
+    }
     const lastDateOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
     return lastDateOfMonth - now.getDate() + 1;
   }

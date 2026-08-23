@@ -615,6 +615,11 @@
         <textarea id="s_parking" placeholder="例: 店舗前に2台分あり／近隣コインパーキングをご利用ください">${config.parkingInfo || ""}</textarea>
         <p style="color:var(--ink2);font-size:0.76rem;margin-top:6px;">入力すると、お客様への確認メールに自動で記載されます。</p>
       </div>
+      <div class="field">
+        <label>予約受付をいつまで解放するか（任意）</label>
+        <input type="date" id="s_bookingOpenUntil" value="${config.bookingOpenUntil || ""}">
+        <p style="color:var(--ink2);font-size:0.76rem;margin-top:6px;">空欄の場合は「今月末まで」が自動で使われ、月が変わると翌月分が自動的に開放されます。先の月まで前倒しでお客様に予約を開放したいときだけ、ここに日付を入れてください。</p>
+      </div>
 
       <hr style="border:none;border-top:1px solid var(--line);margin:26px 0;">
       <h2 style="font-size:1rem;">お客様への確認メールの文面</h2>
@@ -643,6 +648,7 @@
       config.tel = document.getElementById("s_tel").value.trim();
       config.address = document.getElementById("s_address").value.trim();
       config.parkingInfo = document.getElementById("s_parking").value.trim();
+      config.bookingOpenUntil = document.getElementById("s_bookingOpenUntil").value.trim();
       saveConfig("settingsMsg").then(() => { $adminSalonName.textContent = `${config.salonName} 管理画面`; });
     });
     document.getElementById("emailSave").addEventListener("click", () => {

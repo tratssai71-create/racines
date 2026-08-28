@@ -118,6 +118,7 @@
     if (activeTab === "reservations") renderReservations();
     else if (activeTab === "block") renderBlock();
     else if (activeTab === "menu") renderMenu();
+    else if (activeTab === "customers") renderCustomers();
     else if (activeTab === "settings") renderSettings();
   }
 
@@ -418,6 +419,68 @@
         const r = await apiPost("adminCancelReservation", { eventId: cell.dataset.id });
         if (!r.success) showMsg("blockMsg", "失敗しました", false);
         refreshBlockTable();
+      });
+    });
+  }
+
+  // ---------- 利用者一覧 ----------
+  const STATUS_LABEL = { pending: "承認待ち", confirmed: "確定" };
+  let expandedCustomers = new Set();
+
+  async function renderCustomers() {
+    $adminContainer.innerHTML = `
+      <div class="admin-section-head"><h2>利用者一覧</h2></div>
+      <p style="color:var(--ink2);font-size:0.82rem;margin-top:-10px;">これまでの予約から、お客様ごとに自動でまとめています。</p>
+      <div class="loading">読み込み中…</div>
+    `;
+    const res = await apiGet({ action: "getCustomers" });
+    if (!res.success) {
+      $adminContainer.querySelector(".loading").outerHTML = `<p class="empty-msg">読み込みに失敗しました</p>`;
+      return;
+    }
+    const customers = res.customers || [];
+    if (customers.length === 0) {
+      $adminContainer.querySelector(".loading").outerHTML = `<p class="empty-msg">まだ予約データがありません</p>`;
+      return;
+    }
+    const rows = customers.map((c, i) => {
+      const isOpen = expandedCustomers.has(c.email);
+      const historyRows = c.history.map((h) => `
+        <tr>
+          <td>${fmtDateTime(h.date)}</td>
+          <td>${h.menuName || ""}</td>
+          <td>${STATUS_LABEL[h.status] || h.status}</td>
+        </tr>
+      `).join("");
+      return `
+        <div class="admin-item-row" data-email="${c.email}">
+          <div class="admin-item-row__top" style="cursor:pointer;" data-toggle="${c.email}">
+            <div class="admin-item-field admin-item-field--name" style="flex:1;">
+              <label>お名前（${c.visitCount}回来店）</label>
+              <div style="font-size:0.95rem;">${c.name || "（未入力）"}${c.kana ? `　${c.kana}` : ""}</div>
+              <div style="color:var(--ink2);font-size:0.78rem;margin-top:4px;">
+                ${c.tel || ""}　${c.email}　最終来店: ${c.lastVisit ? fmtDateTime(c.lastVisit) : "-"}
+              </div>
+            </div>
+            <button class="icon-btn">${isOpen ? "▾" : "▸"}</button>
+          </div>
+          ${isOpen ? `
+            <table class="admin-table" style="margin-top:10px;">
+              <thead><tr><th>日時</th><th>コース</th><th>状態</th></tr></thead>
+              <tbody>${historyRows}</tbody>
+            </table>
+          ` : ""}
+        </div>
+      `;
+    }).join("");
+
+    $adminContainer.querySelector(".loading").outerHTML = `<div id="customerList">${rows}</div>`;
+    $adminContainer.querySelectorAll("[data-toggle]").forEach((el) => {
+      el.addEventListener("click", () => {
+        const email = el.dataset.toggle;
+        if (expandedCustomers.has(email)) expandedCustomers.delete(email);
+        else expandedCustomers.add(email);
+        renderCustomers();
       });
     });
   }

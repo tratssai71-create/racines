@@ -148,13 +148,14 @@
       $adminContainer.querySelector(".loading").outerHTML = `<p class="empty-msg">今後60日以内の予約・ブロックはありません</p>`;
       return;
     }
-    const rows = list.map((r) => {
-      const isPending = r.type === "reservation" && r.status === "pending";
-      const typeBadge = r.type === "blocked"
-        ? `<span class="badge badge--blocked">ブロック</span>`
-        : isPending
-          ? `<span class="badge badge--blocked">承認待ち</span>`
-          : `<span class="badge badge--reservation">予約確定</span>`;
+    const reservationList = list.filter((r) => r.type !== "blocked");
+    const blockList = list.filter((r) => r.type === "blocked");
+
+    function reservationRow(r) {
+      const isPending = r.status === "pending";
+      const typeBadge = isPending
+        ? `<span class="badge badge--blocked">承認待ち</span>`
+        : `<span class="badge badge--reservation">予約確定</span>`;
       return `
       <tr>
         <td>${fmtDateTime(r.start)}<br>〜 ${fmtDateTime(r.end)}</td>
@@ -166,12 +167,32 @@
         </td>
       </tr>
     `;
-    }).join("");
+    }
+    function blockRow(r) {
+      return `
+      <tr>
+        <td>${fmtDateTime(r.start)}<br>〜 ${fmtDateTime(r.end)}</td>
+        <td>${r.title}</td>
+        <td><button class="btn btn-small btn-danger" data-id="${r.eventId}">解除</button></td>
+      </tr>
+    `;
+    }
+
     $adminContainer.querySelector(".loading").outerHTML = `
-      <table class="admin-table">
-        <thead><tr><th>日時</th><th>種別</th><th>内容</th><th></th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
+      <h3 style="margin:18px 0 10px;font-size:0.95rem;">ご予約</h3>
+      ${reservationList.length === 0
+        ? `<p class="empty-msg">今後60日以内のご予約はありません</p>`
+        : `<table class="admin-table">
+             <thead><tr><th>日時</th><th>種別</th><th>内容</th><th></th></tr></thead>
+             <tbody>${reservationList.map(reservationRow).join("")}</tbody>
+           </table>`}
+      <h3 style="margin:26px 0 10px;font-size:0.95rem;">ブロック中の時間</h3>
+      ${blockList.length === 0
+        ? `<p class="empty-msg">ブロック中の時間はありません</p>`
+        : `<table class="admin-table">
+             <thead><tr><th>日時</th><th>理由</th><th></th></tr></thead>
+             <tbody>${blockList.map(blockRow).join("")}</tbody>
+           </table>`}
     `;
     $adminContainer.querySelectorAll("[data-approve-id]").forEach((btn) => {
       btn.addEventListener("click", async () => {

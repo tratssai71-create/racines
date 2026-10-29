@@ -72,15 +72,23 @@
 
   // 本番モード（API_URL設定済み）では、店名・メニュー・スタッフ・営業時間などの
   // 「内容」はGAS側（管理画面で編集可能）から毎回取得し、config.js の値は上書きされる。
-  async function loadRuntimeConfig() {
-    if (isDemo) return;
+  // 前回取得した設定を端末に記憶しておき、2回目以降は待たずに即表示する（裏で最新版に更新）。
+  const CONFIG_CACHE_KEY = "salon_config_cache";
+  function readCachedConfig() {
     try {
-      const res = await fetch(`${CFG.API_URL}?action=getConfig`);
-      const json = await res.json();
-      if (json.success) Object.assign(CFG, json.config);
+      const raw = localStorage.getItem(CONFIG_CACHE_KEY);
+      return raw ? JSON.parse(raw) : null;
     } catch (e) {
-      console.error("設定の取得に失敗しました", e);
+      return null;
     }
+  }
+  function writeCachedConfig(config) {
+    try { localStorage.setItem(CONFIG_CACHE_KEY, JSON.stringify(config)); } catch (e) { /* 無視 */ }
+  }
+  async function fetchRuntimeConfig() {
+    const res = await fetch(`${CFG.API_URL}?action=getConfig`);
+    const json = await res.json();
+    return json.success ? json.config : null;
   }
 
   function renderHeader() {
@@ -168,21 +176,32 @@
     return new Date(y, m - 1, d).getDay();
   }
 
-  async function fetchSlots(dateStr, durationMin) {
+  // 取得中のリクエスト自体をキャッシュする（先読み中に同じ日を重ねて取りに行かないため）
+  function fetchSlots(dateStr, durationMin) {
     const cacheKey = `${dateStr}_${durationMin}`;
     if (state.slotsCache[cacheKey]) return state.slotsCache[cacheKey];
 
-    let slots;
-    if (isDemo) {
-      slots = mockFetchSlots(dateStr, durationMin);
-    } else {
+    const promise = (async () => {
+      if (isDemo) return mockFetchSlots(dateStr, durationMin);
       const url = `${CFG.API_URL}?action=getSlots&date=${encodeURIComponent(dateStr)}&durationMin=${durationMin}`;
       const res = await fetch(url);
       const json = await res.json();
-      slots = json.slots || [];
+      return json.slots || [];
+    })();
+    state.slotsCache[cacheKey] = promise;
+    promise.catch(() => { delete state.slotsCache[cacheKey]; });
+    return promise;
+  }
+
+  // メニューを選んだ時点で、最初の1週間分の空き状況を裏で先に取得しておく
+  function prefetchFirstWeekSlots() {
+    if (!state.menu) return;
+    const todK = todayKey();
+    for (let i = 0; i < DAYS_PER_PAGE; i++) {
+      const d = addDays(todK, i);
+      if (CFG.closedWeekdays.includes(dowOfDateStr(d))) continue;
+      fetchSlots(d, state.menu.durationMin).catch(() => {});
     }
-    state.slotsCache[cacheKey] = slots;
-    return slots;
   }
 
   function mockFetchSlots(dateStr, durationMin) {
@@ -273,6 +292,7 @@
         state.time = null;
         state.gridStartOffset = 0;
         render();
+        prefetchFirstWeekSlots();
       });
     });
     document.getElementById("next").addEventListener("click", () => {
@@ -524,7 +544,42 @@
   }
 
   (async () => {
-    await loadRuntimeConfig();
+    if (isDemo) {
+      renderHeader();
+      render();
+      return;
+    }
+    const cached = readCachedConfig();
+    if (cached) {
+      // 記憶していた設定ですぐ表示し、最新の設定は裏で取得して差があれば更新する
+      Object.assign(CFG, cached);
+      renderHeader();
+      render();
+      try {
+        const fresh = await fetchRuntimeConfig();
+        if (fresh) {
+          const changed = JSON.stringify(fresh) !== JSON.stringify(cached);
+          writeCachedConfig(fresh);
+          if (changed) {
+            Object.assign(CFG, fresh);
+            renderHeader();
+            if (state.step === 1) render();
+          }
+        }
+      } catch (e) {
+        console.error("設定の更新に失敗しました", e);
+      }
+      return;
+    }
+    try {
+      const fresh = await fetchRuntimeConfig();
+      if (fresh) {
+        Object.assign(CFG, fresh);
+        writeCachedConfig(fresh);
+      }
+    } catch (e) {
+      console.error("設定の取得に失敗しました", e);
+    }
     renderHeader();
     render();
   })();

@@ -18,15 +18,39 @@
   const $lookupBtn = document.getElementById("lookupBtn");
   const $resultArea = document.getElementById("resultArea");
 
+  // app.js と同じキーで設定を記憶し、2回目以降は待たずに表示する
+  const CONFIG_CACHE_KEY = "salon_config_cache";
   async function loadRuntimeConfig() {
     if (isDemo) return;
     try {
+      const raw = localStorage.getItem(CONFIG_CACHE_KEY);
+      if (raw) {
+        Object.assign(CFG, JSON.parse(raw));
+        refreshConfigInBackground_();
+        return;
+      }
+    } catch (e) { /* 無視 */ }
+    try {
       const res = await fetch(`${CFG.API_URL}?action=getConfig`);
       const json = await res.json();
-      if (json.success) Object.assign(CFG, json.config);
+      if (json.success) {
+        Object.assign(CFG, json.config);
+        try { localStorage.setItem(CONFIG_CACHE_KEY, JSON.stringify(json.config)); } catch (e) { /* 無視 */ }
+      }
     } catch (e) {
       console.error("設定の取得に失敗しました", e);
     }
+  }
+  async function refreshConfigInBackground_() {
+    try {
+      const res = await fetch(`${CFG.API_URL}?action=getConfig`);
+      const json = await res.json();
+      if (json.success) {
+        localStorage.setItem(CONFIG_CACHE_KEY, JSON.stringify(json.config));
+        Object.assign(CFG, json.config);
+        renderHeader();
+      }
+    } catch (e) { /* 無視 */ }
   }
 
   function renderHeader() {

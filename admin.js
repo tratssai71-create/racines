@@ -65,9 +65,9 @@
 
   async function tryLogin() {
     try {
-      const res = await apiPost("adminLogin", {});
+      // ログイン確認と設定の取得を同時に行う（順番に待つより速い）
+      const [res] = await Promise.all([apiPost("adminLogin", {}), loadConfig()]);
       if (res.success) {
-        await loadConfig();
         $loginScreen.style.display = "none";
         $dashboard.style.display = "block";
         renderTab();

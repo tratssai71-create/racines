@@ -65,7 +65,8 @@
 
   async function tryLogin() {
     try {
-      // ログイン確認と設定の取得を同時に行う（順番に待つより速い）
+      // ログイン確認・設定の取得・予約一覧の取得を同時に行う（順番に待つより速い）
+      if (activeTab === "reservations") prefetchedReservations = fetchReservationList();
       const [res] = await Promise.all([apiPost("adminLogin", {}), loadConfig()]);
       if (res.success) {
         $loginScreen.style.display = "none";
@@ -131,15 +132,22 @@
   }
 
   // ---------- 予約一覧 ----------
+  let prefetchedReservations = null;
+  function fetchReservationList() {
+    const from = todayKey();
+    const to = addDays(from, 60);
+    return apiGet({ action: "getReservations", from, to }).catch(() => ({ success: false }));
+  }
+
   async function renderReservations() {
     $adminContainer.innerHTML = `
       <div class="admin-section-head"><h2>予約一覧</h2></div>
       ${msgHtml("resMsg")}
       <div class="loading">読み込み中…</div>
     `;
-    const from = todayKey();
-    const to = addDays(from, 60);
-    const res = await apiGet({ action: "getReservations", from, to });
+    // ログイン確認と同時に先読みしておいた結果があれば、それを使う
+    const res = await (prefetchedReservations || fetchReservationList());
+    prefetchedReservations = null;
     if (!res.success) {
       $adminContainer.querySelector(".loading").outerHTML = `<p class="empty-msg">読み込みに失敗しました</p>`;
       return;

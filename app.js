@@ -262,7 +262,7 @@
       <h2>メニューを選択してください</h2>
       ${CFG.menuCategories.map((cat) => `
         <div class="menu-category">
-          ${cat.image ? `<div class="menu-category__photo"><img src="${cat.image}" alt="${cat.label}"></div>` : ""}
+          ${cat.image ? `<div class="menu-category__photo"><img src="${cat.image}" alt="${cat.label}" loading="lazy" decoding="async"></div>` : ""}
           <div class="menu-category__head">
             <span class="menu-category__en">${cat.name}</span>
             <span class="menu-category__ja">${cat.label}</span>
@@ -270,7 +270,7 @@
           <div class="option-list">
             ${cat.items.map((m) => `
               <div class="option-item ${state.menu?.id === m.id ? "selected" : ""}" data-id="${m.id}">
-                ${m.image ? `<div class="option-item__thumb"><img src="${m.image}" alt=""></div>` : ""}
+                ${m.image ? `<div class="option-item__thumb"><img src="${m.image}" alt="" loading="lazy" decoding="async"></div>` : ""}
                 <div class="option-item__main">
                   <span class="option-item__name">${m.name}</span>
                   <span class="option-item__meta">所要時間 約${m.durationMin}分${m.desc ? " ・ " + m.desc : ""}</span>

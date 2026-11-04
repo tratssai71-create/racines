@@ -248,18 +248,31 @@
   }
 
   // ---------- 各ステップ描画 ----------
+  let lastRenderedStep = null;
   function render() {
+    const stepChanged = lastRenderedStep !== null && lastRenderedStep !== state.step;
+    lastRenderedStep = state.step;
     renderSteps();
     if (state.step === 1) renderMenuStep();
     else if (state.step === 2) renderDateTimeStep();
     else if (state.step === 3) renderInfoStep();
     else if (state.step === 4) renderConfirmStep();
     else if (state.step === 5) renderDoneStep();
+    // 長いメニュー一覧の下のほうでタップしても、次の画面の先頭から見えるようにする。
+    // 日時の画面は空き状況を取得してから組み上がるので、その完了後にスクロールする。
+    if (stepChanged) pendingScroll = true;
+    if (pendingScroll && state.step !== 2) scrollToSteps();
+  }
+  let pendingScroll = false;
+  function scrollToSteps() {
+    pendingScroll = false;
+    $steps.scrollIntoView({ block: "start" });
   }
 
   function renderMenuStep() {
     $container.innerHTML = `
       <h2>メニューを選択してください</h2>
+      <p class="option-item__meta" style="margin:-10px 0 16px;">メニューをタップすると、そのまま日時の選択に進みます。</p>
       ${CFG.menuCategories.map((cat) => `
         <div class="menu-category">
           ${cat.image ? `<div class="menu-category__photo"><img src="${cat.image}" alt="${cat.label}" loading="lazy" decoding="async"></div>` : ""}
@@ -281,9 +294,6 @@
           </div>
         </div>
       `).join("")}
-      <div class="btn-row">
-        <button class="btn btn-primary" id="next" ${state.menu ? "" : "disabled"}>次へ</button>
-      </div>
     `;
     $container.querySelectorAll(".option-item").forEach((el) => {
       el.addEventListener("click", () => {
@@ -291,14 +301,10 @@
         state.date = null;
         state.time = null;
         state.gridStartOffset = 0;
-        render();
         prefetchFirstWeekSlots();
+        state.step = 2;
+        render();
       });
-    });
-    document.getElementById("next").addEventListener("click", () => {
-      if (!state.menu) return;
-      state.step = 2;
-      render();
     });
   }
 
@@ -359,6 +365,8 @@
       </div>
     `;
 
+    if (pendingScroll) scrollToSteps();
+
     document.getElementById("prevWeek").addEventListener("click", () => {
       state.gridStartOffset = Math.max(0, state.gridStartOffset - DAYS_PER_PAGE);
       render();
@@ -405,8 +413,7 @@
       <div class="field" id="f-age">
         <label>年齢 <span style="color:var(--danger)">*</span></label>
         <select id="age">
-          <option value="">選択してください</option>
-          ${Array.from({ length: 99 }, (_, i) => i + 1).map((n) => `<option value="${n}" ${String(c.age) === String(n) ? "selected" : ""}>${n}歳</option>`).join("")}
+          ${Array.from({ length: 99 }, (_, i) => i + 1).map((n) => `<option value="${n}" ${String(c.age || 30) === String(n) ? "selected" : ""}>${n}歳</option>`).join("")}
         </select>
         <div class="field-error">年齢を選択してください</div>
       </div>
@@ -528,6 +535,9 @@
       </ul>
       <div class="btn-row">
         <button class="btn btn-primary" id="restart">新しく予約する</button>
+      </div>
+      <div class="btn-row" style="margin-top:10px;">
+        <a class="btn" href="mypage.html">ご予約の確認・キャンセルはこちら</a>
       </div>
     `;
     document.getElementById("restart").addEventListener("click", () => {

@@ -122,7 +122,7 @@
               <span class="history-item__date">${fmtDateTime(new Date(r.start))}〜</span>
               <span class="history-item__title">${r.title}${r.status === "pending" ? '　<span style="color:var(--ac-d);">（承認待ち）</span>' : ""}</span>
             </div>
-            ${mode === "upcoming" ? `<button class="btn btn-small btn-danger" data-id="${r.eventId}">キャンセル</button>` : ""}
+            ${mode === "upcoming" ? `<button class="btn btn-cancel" data-id="${r.eventId}">この予約をキャンセルする</button>` : ""}
           </li>
         `).join("")}
       </ul>
@@ -151,6 +151,7 @@
 
       $resultArea.innerHTML = `
         <h2 style="margin-top:28px;">今後のご予約</h2>
+        ${upcoming.length ? `<p style="color:var(--ink2);font-size:0.82rem;margin:-6px 0 12px;">キャンセルする場合は、予約の下（または右）にある赤いボタンを押してください。</p>` : ""}
         ${renderList(upcoming, "upcoming")}
         <h2 style="margin-top:28px;">ご予約履歴</h2>
         ${renderList(past, "history")}
@@ -167,7 +168,7 @@
           } else {
             alert("キャンセルに失敗しました。時間をおいて再度お試しください。");
             btn.disabled = false;
-            btn.textContent = "キャンセル";
+            btn.textContent = "この予約をキャンセルする";
           }
         });
       });

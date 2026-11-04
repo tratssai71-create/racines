@@ -193,15 +193,26 @@
     return promise;
   }
 
-  // メニューを選んだ時点で、最初の1週間分の空き状況を裏で先に取得しておく
-  function prefetchFirstWeekSlots() {
+  // 指定した位置から1週間分の空き状況を、裏で先に取得しておく
+  function prefetchWeekSlots(startOffset) {
     if (!state.menu) return;
     const todK = todayKey();
     for (let i = 0; i < DAYS_PER_PAGE; i++) {
-      const d = addDays(todK, i);
+      const d = addDays(todK, startOffset + i);
       if (CFG.closedWeekdays.includes(dowOfDateStr(d))) continue;
       fetchSlots(d, state.menu.durationMin).catch(() => {});
     }
+  }
+
+  // メニューを選んだ時点で、最初の1週間分を先に取得しておく
+  function prefetchFirstWeekSlots() {
+    prefetchWeekSlots(0);
+  }
+
+  // 今の週を表示し終えたら、「次の7日」で見る週を先に取得しておく（押したらすぐ表示できる）
+  function prefetchNextWeekSlots() {
+    if (state.gridStartOffset + DAYS_PER_PAGE >= maxAdvanceDays()) return;
+    prefetchWeekSlots(Math.min(maxAdvanceDays() - DAYS_PER_PAGE, state.gridStartOffset + DAYS_PER_PAGE));
   }
 
   function mockFetchSlots(dateStr, durationMin) {
@@ -366,6 +377,7 @@
     `;
 
     if (pendingScroll) scrollToSteps();
+    prefetchNextWeekSlots();
 
     document.getElementById("prevWeek").addEventListener("click", () => {
       state.gridStartOffset = Math.max(0, state.gridStartOffset - DAYS_PER_PAGE);
